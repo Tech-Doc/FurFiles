@@ -30,3 +30,4 @@ exports.changePermissions = async (fileId, permissions, userId) => {
     await file.save();
     return file;
 };
+module.exports = fileService;
