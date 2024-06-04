@@ -1,3 +1,4 @@
+console.log('Path to authService:', require.resolve('../services/authService'));
 const AuthService = require('../services/authService');
 
 exports.register = async (req, res) => {
