@@ -1,23 +1,21 @@
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
-const register = async (username, email, password) => {
-    const user = new User({ username, email, password });
+dotenv.config();
+
+exports.register = async ({ email, password }) => {
+    const user = new User({ email, password });
     await user.save();
-    return generateToken(user);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return { user, token };
 };
 
-const login = async (email, password) => {
+exports.login = async ({ email, password }) => {
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
         throw new Error('Invalid credentials');
     }
-    return generateToken(user);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return token;
 };
-
-const generateToken = (user) => {
-    return jwt.sign({ id: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
-};
-
-module.exports = { register, login };
-
