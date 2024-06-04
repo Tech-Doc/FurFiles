@@ -2,6 +2,8 @@ const express = require('express');
 const { register, login } = require('../services/authService');
 const router = express.Router();
 
+console.log('Path to authService:', require.resolve('../services/authService'));
+
 router.post('/register', async (req, res) => {
     try {
         const token = await register(req.body.username, req.body.email, req.body.password);
