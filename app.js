@@ -1,17 +1,16 @@
 const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/database');
+const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const fileRoutes = require('./routes/fileRoutes');
+const connectDB = require('./config/database');
+const redisClient = require('./config/redis');
+
+dotenv.config();
 
 const app = express();
-connectDB();
 
-app.use(cors());
 app.use(express.json());
-
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
 
 module.exports = app;
-

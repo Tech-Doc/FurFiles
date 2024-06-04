@@ -1,25 +1,33 @@
 const File = require('../models/File');
+const sharp = require('sharp');
+const fs = require('fs');
 
-const uploadFile = async (filename, path, owner) => {
-    const file = new File({ filename, path, owner });
+exports.uploadFile = async (req) => {
+    const { filename, path } = req.file;
+    const file = new File({ filename, path, owner: req.user.id });
     await file.save();
+
+    // Generate thumbnail for images
+    if (req.file.mimetype.startsWith('image/')) {
+        const thumbnailPath = `uploads/thumbnails/${filename}`;
+        await sharp(req.file.path).resize(200, 200).toFile(thumbnailPath);
+    }
+
     return file;
 };
 
-const listFiles = async (owner, page = 1, limit = 10) => {
-    const files = await File.find({ owner })
-        .skip((page - 1) * limit)
-        .limit(limit);
+exports.listFiles = async (userId) => {
+    const files = await File.find({ owner: userId });
     return files;
 };
 
-const changePermission = async (fileId, permissions) => {
+exports.changePermissions = async (fileId, permissions, userId) => {
     const file = await File.findById(fileId);
-    if (!file) throw new Error('File not found');
+    if (file.owner.toString() !== userId) {
+        throw new Error('Not authorized');
+    }
     file.permissions = permissions;
     await file.save();
     return file;
 };
-
-module.exports = { uploadFile, listFiles, changePermission };
-
+module.exports = fileService;
